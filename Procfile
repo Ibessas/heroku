@@ -1,0 +1,1 @@
+web: java -jar target/Techno-Vaca-0.0.1-SNAPSHOT.war
