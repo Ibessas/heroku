@@ -18,6 +18,7 @@ public class RebanhoService {
 		return repository.findAll();	
 	}
 	
+	//TODO atualizar lista de rebanhos no usuário ao adicionar rebanho
 	public Rebanho postRebanho(Rebanho u) {
 		return repository.save(u);
 	}
@@ -38,6 +39,10 @@ public class RebanhoService {
 
 	public void delete(Rebanho id) {
 		repository.delete(id);
+	}
+
+	public List<Rebanho> findByUsuarioId(int usuario) {
+		return repository.getByUsuarioId(usuario);
 	}
 	
 }

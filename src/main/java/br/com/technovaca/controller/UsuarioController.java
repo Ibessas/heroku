@@ -8,8 +8,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,11 +19,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.technovaca.model.Rebanho;
 import br.com.technovaca.model.Usuario;
 import br.com.technovaca.security.JwtRequest;
 import br.com.technovaca.security.JwtTokenUtil;
-import br.com.technovaca.service.RebanhoService;
+import br.com.technovaca.security.UserDetailsCustom;
 import br.com.technovaca.service.UsuarioService;
 
 @RestController
@@ -34,10 +33,7 @@ public class UsuarioController {
 	private UsuarioService service;
 	
 	@Autowired
-	private RebanhoService rebanhoService;
-	
-	@Autowired
-	private UserDetailsService userDetailsService;
+	private UserDetailsCustom userDetailsService;
 	
 	@Autowired
 	private AuthenticationManager authenticationManager;
@@ -48,8 +44,7 @@ public class UsuarioController {
 	@PostMapping("/authenticate")
 	public ResponseEntity<String> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
 		authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
-		final UserDetails userDetails = userDetailsService
-				.loadUserByUsername(authenticationRequest.getUsername());
+		final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());
 		final String token = jwtTokenUtil.generateToken(userDetails);
 		return ResponseEntity.ok(token);
 	}
@@ -59,9 +54,13 @@ public class UsuarioController {
 		try {
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 		} catch (DisabledException e) {
+			System.err.println(e);
 			throw new Exception("USER_DISABLED", e);
 		} catch (BadCredentialsException e) {
+			System.err.println(e);
 			throw new Exception("INVALID_CREDENTIALS", e);
+		} catch (AuthenticationException e) {
+			throw new BadCredentialsException("Invalid username/password supplied");
 		}
 	}
 	
@@ -92,8 +91,4 @@ public class UsuarioController {
 		service.delete(service.getUsuarioById(id));
 	}
 	
-	@PutMapping("/{usuario}")
-	public void addRebanho(@PathVariable int usuario, @RequestBody Rebanho rebanho) {
-		rebanhoService.postRebanho(rebanho);
-	}
 }

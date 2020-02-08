@@ -1,12 +1,8 @@
 package br.com.technovaca.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -15,7 +11,7 @@ import br.com.technovaca.model.Usuario;
 import br.com.technovaca.repository.UsuarioRepository;
 
 @Service
-public class UsuarioService implements UserDetailsService {
+public class UsuarioService{
 	
 	@Autowired
 	private UsuarioRepository repository;
@@ -51,13 +47,8 @@ public class UsuarioService implements UserDetailsService {
 		repository.delete(id);
 	}
 
-	@Override
-	public UserDetails loadUserByUsername(String nome) throws UsernameNotFoundException {
-		Usuario user = repository.findByNome(nome);
-		if (user == null) {
-			throw new UsernameNotFoundException("User not found with username: " + nome);
-		}
-		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
-				new ArrayList<>());
+	public Usuario findByUsename(String username) {
+		return repository.getUsuarioByNome(username);
 	}
+
 }

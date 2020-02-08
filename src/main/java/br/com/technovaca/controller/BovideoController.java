@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.technovaca.error.NotAllowedException;
+import br.com.technovaca.model.Rebanho;
+import br.com.technovaca.model.Usuario;
 import br.com.technovaca.model.bovideo.Bovideo;
 import br.com.technovaca.model.bovideo.Femea;
 import br.com.technovaca.model.bovideo.Macho;
@@ -32,31 +36,50 @@ public class BovideoController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<Bovideo> getBovideoById(@PathVariable int id){
-		return ResponseEntity.ok(service.getBovideoById(id));
+	public ResponseEntity<Bovideo> getBovideoById(@AuthenticationPrincipal Usuario usuario, @PathVariable Bovideo id){
+		if(!id.isMyOwner(usuario))
+			throw new NotAllowedException();
+		return ResponseEntity.ok(service.getBovideoById(id.getId()));
 	}
 	
-	@PostMapping("/macho")
-	public ResponseEntity<Bovideo> postBovideoMacho(@RequestBody Macho id){
+	@PostMapping("/macho/{rebanho}")
+	public ResponseEntity<Bovideo> postBovideoMacho(@AuthenticationPrincipal Usuario usuario, @PathVariable Rebanho rebanho, @RequestBody Macho id){
+		if(!rebanho.isMyOwner(usuario))
+			throw new NotAllowedException();
 		id.setSexo(Sexo.MACHO);
+		id.setRebanho(rebanho);
 		return ResponseEntity.ok(service.postBovideo(id));
 	}
 	
-	@PostMapping("/femea")
-	public ResponseEntity<Bovideo> postBovideoFemea(@RequestBody Femea id){
+	@PostMapping("/femea/{rebanho}")
+	public ResponseEntity<Bovideo> postBovideoFemea(@AuthenticationPrincipal Usuario usuario, @PathVariable Rebanho rebanho, @RequestBody Femea id){
+		if(!rebanho.isMyOwner(usuario))
+			throw new NotAllowedException();
 		id.setSexo(Sexo.FEMEA); 
+		id.setRebanho(rebanho);
 		return ResponseEntity.ok(service.postBovideo(id));
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<Bovideo> putBovideo(@PathVariable("id")String original, @RequestBody Bovideo atualizado){
-		atualizado.setId(original);
+	public ResponseEntity<Bovideo> putBovideo(@AuthenticationPrincipal Usuario usuario, @PathVariable("id")Bovideo original, @RequestBody Bovideo atualizado){
+		if(!original.isMyOwner(usuario))
+			throw new NotAllowedException();
+		atualizado.setId(original.getId());
 		return ResponseEntity.ok(service.putBovideo(atualizado));
 	}
 	
+	@GetMapping("/rebanho/{id}")
+	public ResponseEntity<List<Bovideo>> getByRebanho(@PathVariable("id") Rebanho id, @AuthenticationPrincipal Usuario usuario){
+		if(!id.isMyOwner(usuario))
+			throw new NotAllowedException();
+		return ResponseEntity.ok(service.getByRebanho(id.getId()));
+	}
+	
 	@DeleteMapping("/{id}")
-	public void deleteBovideo(@PathVariable int id){
-		service.delete(service.getBovideoById(id));
+	public void deleteBovideo(@AuthenticationPrincipal Usuario usuario, @PathVariable Bovideo id){
+		if(!id.isMyOwner(usuario))
+			throw new NotAllowedException();
+		service.delete(service.getBovideoById(id.getId()));
 	}
 	
 }

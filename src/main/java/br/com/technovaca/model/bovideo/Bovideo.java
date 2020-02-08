@@ -4,21 +4,29 @@ import java.util.Calendar;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import br.com.technovaca.model.Localizacao;
 import br.com.technovaca.model.Rebanho;
 import br.com.technovaca.model.Status;
+import br.com.technovaca.model.Usuario;
 import br.com.technovaca.model.Vacina;
 
 @Entity
 public abstract class Bovideo {
 	
 	@Id
-	private String id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
+	
+	private String nome;
 	
 	private Calendar nascimento;
 	@OneToOne
@@ -26,6 +34,7 @@ public abstract class Bovideo {
 	@OneToOne
 	private Bovideo progenitora;
 	private Status status;
+	@JsonIgnore
 	@ManyToOne
 	private Rebanho rebanho;
 	@OneToMany
@@ -40,12 +49,26 @@ public abstract class Bovideo {
 	
 	public Bovideo() {}
 	
-	public Bovideo(String id, Calendar nascimento, Status status) {
-		this.id = id;
+	public Bovideo(Rebanho rebanho, String nome, Calendar nascimento, Status status) {
+		this.rebanho = rebanho;
+		this.nome = nome;
 		this.nascimento = nascimento;
 		this.status = status;
 	}
 	
+	public boolean isMyOwner(Usuario usuario) {
+		return rebanho.isMyOwner(usuario);
+	}
+	
+	
+	public String getNome() {
+		return nome;
+	}
+
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
+
 	public String getFoto() {
 		return foto;
 	}
@@ -118,20 +141,12 @@ public abstract class Bovideo {
 	public void setVacinas(List<Vacina> vacinas) {
 		this.vacinas = vacinas;
 	}
-	public String getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(int id) {
 		this.id = id;
-	}
-
-	public Calendar getDataNasc() {
-		return nascimento;
-	}
-
-	public void setDataNasc(Calendar nascimento) {
-		this.nascimento = nascimento;
 	}
 
 	public Status getStatus() {

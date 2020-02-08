@@ -39,5 +39,9 @@ public class BovideoService {
 	public void delete(Bovideo id) {
 		repository.delete(id);
 	}
+
+	public List<Bovideo> getByRebanho(int id) {
+		return repository.getByRebanhoId(id);
+	}
 	
 }

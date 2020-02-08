@@ -21,7 +21,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import br.com.technovaca.model.CustomException;
-import br.com.technovaca.service.UsuarioService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -41,7 +40,7 @@ public class JwtTokenProvider {
   private long validityInMilliseconds = 3600000; // 1h
 
   @Autowired
-  private UsuarioService myUserDetails;
+  private UserDetailsCustom myUserDetails;
 
   @PostConstruct
   protected void init() {
@@ -65,7 +64,7 @@ public class JwtTokenProvider {
   }
 
   public Authentication getAuthentication(String token) {
-    UserDetails userDetails = myUserDetails.loadUserByUsername(getUsername(token));
+    UserDetails userDetails = myUserDetails.loadUserByUsername((getUsername(token)));
     return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
   }
 

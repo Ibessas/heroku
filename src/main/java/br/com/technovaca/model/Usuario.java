@@ -1,9 +1,13 @@
 package br.com.technovaca.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -26,7 +30,6 @@ public class Usuario implements UserDetails{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
-	
 	private String nome;
 	private String email;
 	private String telefone;
@@ -34,9 +37,8 @@ public class Usuario implements UserDetails{
 	@NotEmpty
 	private String password;
 	
-	@OneToMany
+	@OneToMany(mappedBy="usuario",cascade=CascadeType.REMOVE, fetch = FetchType.EAGER)
 	private List<Rebanho> rebanhos;
-	
 	
 	public Usuario() {}
 	
@@ -51,16 +53,6 @@ public class Usuario implements UserDetails{
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-	public List<Rebanho> getRebanhos() {
-		return rebanhos;
-	}
-
-
-	public void setRebanhos(List<Rebanho> rebanhos) {
-		this.rebanhos = rebanhos;
-	}
-
 
 	public int getId() {
 		return id;
@@ -89,10 +81,13 @@ public class Usuario implements UserDetails{
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		// TODO Auto-generated method stub
-		return null;
+		return Collections.emptyList();
 	}
 
+	public List<String> getRoles() {
+		return new ArrayList<String>();
+	}
+	
 	@Override
 	public String getPassword() {
 		return password;
@@ -105,22 +100,32 @@ public class Usuario implements UserDetails{
 
 	@Override
 	public boolean isAccountNonExpired() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isAccountNonLocked() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isCredentialsNonExpired() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean isEnabled() {
 		return true;
 	}
+
+	public List<Rebanho> getRebanhos() {
+		return rebanhos;
+	}
+
+	public void setRebanhos(List<Rebanho> rebanhos) {
+		this.rebanhos = rebanhos;
+	}
+	
+	
 	
 }
